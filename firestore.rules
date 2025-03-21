@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow full access to the reports collection since this is an internal business app
+    match /weeklyReports/{reportId} {
+      allow read, write;
+    }
+    
+    // Add more collections and rules as needed
+  }
+} 
