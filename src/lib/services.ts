@@ -15,14 +15,15 @@ import {
   endBefore,
   limitToLast,
   type DocumentData,
-  type DocumentSnapshot
+  type DocumentSnapshot,
+  type QueryDocumentSnapshot
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type { MetricData, WeeklyReport } from '@/types';
 import { getEasternTimeDate, getWeekRange } from '@/lib/dateUtils';
 
-// Type for Firestore document reference
-export type FirestoreDocRef = DocumentSnapshot<DocumentData>;
+// Type for Firestore document reference - make it accept both types
+export type FirestoreDocRef = DocumentSnapshot<DocumentData> | QueryDocumentSnapshot<DocumentData>;
 
 // Default metrics template
 export const DEFAULT_METRICS: MetricData[] = [
@@ -72,7 +73,8 @@ export const DEFAULT_METRICS: MetricData[] = [
   }
 ];
 
-// Utility function to convert Firestore document to WeeklyReport
+// Utility function to convert Firestore document to WeeklyReport (for future use)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const convertDocToWeeklyReport = (doc: DocumentSnapshot<DocumentData>): WeeklyReport => {
   const data = doc.data();
   if (!data) {
@@ -120,11 +122,11 @@ export const submitWeeklyReport = async (
 // Create a pending report for a user
 export const createPendingReport = async (name: string): Promise<WeeklyReport> => {
   try {
-    // Get the current date in Eastern Time
-    const now = getEasternTimeDate();
+    // Get Eastern Time date for reference (not directly used)
+    getEasternTimeDate();
     
     // Create a new date for the end of the week (Sunday)
-    const weekRange = getWeekRange(now);
+    const weekRange = getWeekRange();
     const weekEndingDate = weekRange.end;
     
     const reportData = {

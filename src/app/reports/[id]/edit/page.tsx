@@ -10,7 +10,8 @@ import type { WeeklyReport } from '@/types';
 
 export default function EditReport() {
   const { id } = useParams();
-  const router = useRouter();
+  // Not using router for now
+  useRouter();
   const [report, setReport] = useState<WeeklyReport | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');

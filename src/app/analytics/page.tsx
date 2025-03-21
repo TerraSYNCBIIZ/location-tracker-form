@@ -40,7 +40,7 @@ const useDebounce = <T extends (...args: unknown[]) => unknown>(fn: T, delay: nu
 
 export default function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState('month');
-  const [metricsData, setMetricsData] = useState<MetricsData | null>(null);
+  const [, setMetricsData] = useState<MetricsData | null>(null);
   const [chartData, setChartData] = useState<ChartDataItem[]>([]);
   const [achievements, setAchievements] = useState<Record<string, { percentage: number; status: string }>>({});
   const [isLoading, setIsLoading] = useState(true);

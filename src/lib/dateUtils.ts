@@ -70,10 +70,9 @@ export const formatDate = (date: Date): string => {
 
 /**
  * Get the week range (Monday to Sunday) for a given date
- * @param date Date within the week
  * @returns Object with start and end dates
  */
-export const getWeekRange = (date: Date = new Date()): { start: Date; end: Date } => {
+export const getWeekRange = (): { start: Date; end: Date } => {
   const etDate = getEasternTimeDate();
   const day = etDate.getDay();
   

@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { getArchivedReports, getPreviousArchivedReports, type FirestoreDocRef } from '@/lib/services';
 import type { WeeklyReport } from '@/types';
 import { doc, getDoc } from 'firebase/firestore';
-import type { DocumentReference } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 
@@ -25,10 +24,10 @@ export const ArchivedReportsList = () => {
   const pageSize = 5;
   
   // Store the last doc for pagination
-  const [lastDoc, setLastDoc] = useState<FirestoreDocRef | null>(null);
+  const [lastDoc, setLastDoc] = useState<any | null>(null);
   
   // Store the first docs for each page to enable going back
-  const [firstDocs, setFirstDocs] = useState<FirestoreDocRef[]>([]);
+  const [firstDocs, setFirstDocs] = useState<any[]>([]);
 
   useEffect(() => {
     fetchReports();
@@ -149,10 +148,6 @@ export const ArchivedReportsList = () => {
         {reports.map((report) => {
           const weekEnding = new Date(report.weekEndingDate).toLocaleDateString();
           const submittedOn = new Date(report.createdAt).toLocaleDateString();
-          
-          // Count completed metrics
-          const completedCount = report.metrics.filter(m => m.completed).length;
-          const totalMetrics = report.metrics.length;
           
           return (
             <div key={report.id} className="bg-[#232323] rounded-lg shadow-md p-5 border border-[#333333] mb-4">

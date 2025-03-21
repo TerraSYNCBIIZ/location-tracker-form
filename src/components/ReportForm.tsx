@@ -182,7 +182,8 @@ export const ReportForm = ({ pendingReport }: ReportFormProps) => {
         if (progressPercentage >= 75) return "on-track";
         
         // Calculate weekly target (divide monthly target by 4 weeks)
-        const weeklyTarget = target / 4;
+        // Weekly target calculation - commented out as not currently used
+        // target / 4;
         const weekNumber = Math.floor((new Date().getDate() - 1) / 7) + 1;
         
         // By this week, they should have completed (weekNumber/4) of their target
@@ -232,7 +233,8 @@ export const ReportForm = ({ pendingReport }: ReportFormProps) => {
     if (metric.frequency !== 'Monthly') return 0;
     
     const targetValue = metric.targetValue || 0;
-    const weeklyTarget = targetValue / 4; // Divide monthly target into 4 weeks
+    // Weekly target calculation - commented out as not currently used
+    // targetValue / 4;
     const weekNumber = getCurrentWeekOfMonth();
     
     // Previous progress for this metric

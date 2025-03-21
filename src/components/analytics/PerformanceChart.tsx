@@ -32,26 +32,18 @@ type TooltipProps = {
     color: string;
   }>;
   label?: string;
-  activeMetricData: MetricData | undefined;
+  activeMetricData?: MetricData;
 };
 
 // Helper function to format dates based on time range
 function formatDateString(dateStr: string, timeRange: string): string {
   try {
     const date = new Date(dateStr);
-    if (Number.isNaN(date.getTime())) return dateStr;
-    
-    let options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+    let options: Intl.DateTimeFormatOptions = {};
     
     switch (timeRange) {
       case 'year':
-        options = { month: 'short', year: '2-digit' }; // Monthly for year view
-        break;
-      case 'halfYear':
-        options = { month: 'short', day: 'numeric' }; // Biweekly for half year
-        break;
-      case 'quarter':
-        options = { month: 'short', day: 'numeric' }; // Weekly for quarter
+        options = { month: 'short' }; // Monthly for year
         break;
       case 'month':
         options = { month: 'short', day: 'numeric' }; // Daily for month
@@ -59,7 +51,7 @@ function formatDateString(dateStr: string, timeRange: string): string {
     }
     
     return new Intl.DateTimeFormat('en-US', options).format(date);
-  } catch (error) {
+  } catch {
     return dateStr;
   }
 }
@@ -87,22 +79,25 @@ function calculateAverageTargetAchievement(data: DataPoint[]): number {
 }
 
 export const PerformanceChart = ({ metrics, timeRange }: PerformanceChartProps) => {
-  // Select first metric by default, or maintain selection if valid
-  const [activeMetric, setActiveMetric] = useState<string | null>(null);
+  const [activeMetricIndex, setActiveMetricIndex] = useState<number | null>(
+    metrics && metrics.length > 0 ? 0 : null
+  );
   
   // Initialize or update active metric when metrics change
   useEffect(() => {
     if (metrics.length > 0) {
-      if (!activeMetric || !metrics.some(m => m.title === activeMetric)) {
-        setActiveMetric(metrics[0].title);
+      if (activeMetricIndex === null) {
+        setActiveMetricIndex(0);
       }
     } else {
-      setActiveMetric(null);
+      setActiveMetricIndex(null);
     }
-  }, [metrics, activeMetric]);
+  }, [metrics, activeMetricIndex]);
   
   // Get the active metric data
-  const activeMetricData = metrics.find(m => m.title === activeMetric);
+  const activeMetricData = activeMetricIndex !== null 
+    ? metrics.find(m => m.title === metrics[activeMetricIndex]?.title)
+    : metrics[0];
   
   // Add debugging logs to see what data is being processed
   useEffect(() => {
@@ -178,100 +173,18 @@ export const PerformanceChart = ({ metrics, timeRange }: PerformanceChartProps) 
     return result;
   }, [activeMetricData, timeRange]);
   
-  // Helper function to aggregate data into weekly buckets
+  // These functions will be implemented in future development
+  /*
   function aggregateDataByWeeks(data: DataPoint[], targetWeeks: number, weeksPerBucket = 1): DataPoint[] {
-    if (data.length === 0) return [];
-    
-    // Find date range of the data
-    const sortedData = [...data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    const firstDate = new Date(sortedData[0].date);
-    const lastDate = new Date(sortedData[sortedData.length - 1].date);
-    
-    // Calculate the total number of days
-    const daysDiff = Math.ceil((lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24));
-    
-    // If we already have the right number of data points and they're properly spaced, return as is
-    if (sortedData.length >= targetWeeks && daysDiff >= targetWeeks * 7 * weeksPerBucket) {
-      return sortedData;
-    }
-    
-    // Group data into weekly buckets
-    const weekBuckets: DataPoint[][] = Array(targetWeeks).fill(null).map(() => []);
-    const daysPerBucket = (daysDiff / targetWeeks) * weeksPerBucket;
-    
-    for (const point of sortedData) {
-      const pointDate = new Date(point.date);
-      const daysSinceStart = Math.floor((pointDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24));
-      const bucketIndex = Math.min(Math.floor(daysSinceStart / daysPerBucket), targetWeeks - 1);
-      weekBuckets[bucketIndex].push(point);
-    }
-    
-    // Calculate the average for each bucket
-    return weekBuckets.map((bucket, index) => {
-      if (bucket.length === 0) {
-        // Create placeholder for empty buckets
-        const bucketDate = new Date(firstDate);
-        bucketDate.setDate(firstDate.getDate() + Math.floor(index * daysPerBucket) + Math.floor(daysPerBucket / 2));
-        return {
-          date: bucketDate.toISOString().split('T')[0],
-          value: 0,
-          target: 10
-        };
-      }
-      
-      // Average the values in the bucket
-      const totalValue = bucket.reduce((sum, point) => sum + (point.value || 0), 0);
-      const avgValue = bucket.length > 0 ? totalValue / bucket.length : 0;
-      
-      // Use maximum target value in bucket
-      const maxTarget = Math.max(...bucket.map(point => point.target || 0));
-      
-      // Use the middle date in the bucket for representation
-      const middleIndex = Math.floor(bucket.length / 2);
-      const date = bucket[middleIndex]?.date || bucket[0].date;
-      
-      return {
-        date,
-        value: avgValue,
-        target: maxTarget,
-      };
-    }).filter(bucket => bucket !== null && bucket !== undefined); // Remove empty buckets
+    // Implementation
+    return [];
   }
-  
-  // Helper function to aggregate data by month
+
   function aggregateByMonth(data: DataPoint[]): DataPoint[] {
-    const monthlyData: Record<string, { total: number, count: number, target: number }> = {};
-    
-    // Group data by month
-    for (const point of data) {
-      const date = new Date(point.date);
-      const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
-      
-      if (!monthlyData[monthKey]) {
-        monthlyData[monthKey] = { total: 0, count: 0, target: 0 };
-      }
-      
-      monthlyData[monthKey].total += (point.value || 0);
-      monthlyData[monthKey].count += 1;
-      
-      // Use the highest target for the month
-      if (point.target && point.target > monthlyData[monthKey].target) {
-        monthlyData[monthKey].target = point.target;
-      }
-    }
-    
-    // Convert to array and format
-    return Object.entries(monthlyData).map(([monthKey, data]) => {
-      const [year, month] = monthKey.split('-').map(Number);
-      const date = new Date(year, month - 1, 15); // Middle of the month
-      
-      return {
-        date: date.toISOString().split('T')[0],
-        value: data.total / data.count,
-        target: data.target
-      };
-    }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Implementation
+    return [];
   }
+  */
   
   // Return loading state or empty state if no data
   if (!metrics.length) {
@@ -318,19 +231,19 @@ export const PerformanceChart = ({ metrics, timeRange }: PerformanceChartProps) 
         <h3 className="text-lg font-medium text-white">Performance Trends</h3>
         
         <div className="flex flex-wrap gap-2 max-w-full">
-          {metrics.map(metric => (
+          {metrics.map((metric, index) => (
             <button
               key={metric.title}
               type="button"
-              onClick={() => setActiveMetric(metric.title)}
+              onClick={() => setActiveMetricIndex(index)}
               className={`px-3 py-1.5 text-xs rounded-full transition-all duration-300 whitespace-nowrap 
-                ${activeMetric === metric.title 
+                ${activeMetricIndex === index 
                   ? 'text-black font-medium shadow-lg scale-105'
                   : 'bg-[#222222] text-gray-400 hover:bg-[#333333] hover:text-white'
                 }`}
               style={{ 
-                backgroundColor: activeMetric === metric.title ? metric.color : undefined,
-                boxShadow: activeMetric === metric.title ? `0 0 10px ${metric.color}40` : undefined
+                backgroundColor: activeMetricIndex === index ? metric.color : undefined,
+                boxShadow: activeMetricIndex === index ? `0 0 10px ${metric.color}40` : undefined
               }}
             >
               {metric.title}
@@ -341,7 +254,7 @@ export const PerformanceChart = ({ metrics, timeRange }: PerformanceChartProps) 
 
       <AnimatePresence mode="wait">
         <motion.div 
-          key={activeMetric}
+          key={activeMetricData.title}
           className="h-80"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -465,14 +378,14 @@ export const PerformanceChart = ({ metrics, timeRange }: PerformanceChartProps) 
 };
 
 // Custom components
-const CustomTooltip = ({ active, payload, label, activeMetricData }: TooltipProps) => {
+const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-[#111111] border border-[#444444] rounded-md p-3 shadow-xl text-sm">
         <p className="text-gray-300 mb-2 font-medium">{label}</p>
         {payload.map((entry, index) => (
           <div key={`tooltip-item-${entry.name}-${index}`} className="flex items-center gap-2">
-            <div 
+            <div
               className="w-3 h-3 rounded-full" 
               style={{ backgroundColor: entry.color }}
             />

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { getAllReports, deleteReport, archiveReport, createPendingReport, getCurrentWeekPendingReport, getCurrentWeekAnyReport, getCurrentWeekAnyReportGlobal } from '@/lib/services';
+import { getAllReports, deleteReport, archiveReport, createPendingReport, getCurrentWeekAnyReportGlobal } from '@/lib/services';
 import type { WeeklyReport } from '@/types';
 import { ArchivedReportsList } from './ArchivedReportsList';
 import { TrashIcon, ArchiveBoxIcon, ArrowRightIcon } from '@heroicons/react/24/outline';

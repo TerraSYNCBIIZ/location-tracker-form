@@ -3,15 +3,16 @@
 import { useEffect, useState } from 'react';
 import { Header } from '@/components/Header';
 import { ReportList } from '@/components/ReportList';
-import { createPendingReport, getCurrentWeekPendingReport, getCurrentWeekAnyReportGlobal } from '@/lib/services';
+import { createPendingReport, getCurrentWeekAnyReportGlobal } from '@/lib/services';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { WeeklyReport } from '@/types';
-import { getEasternTimeDate, shouldCreateNewReport } from '@/lib/dateUtils';
+import { shouldCreateNewReport } from '@/lib/dateUtils';
 import * as StorageUtils from '@/lib/storageUtils';
 
 export default function Home() {
-  const [isChecking, setIsChecking] = useState(true);
+  // isChecking is used to track initialization state
+  const [, setIsChecking] = useState(true);
   const [userName, setUserName] = useState('');
   const [pendingReport, setPendingReport] = useState<WeeklyReport | null>(null);
   const [listKey, setListKey] = useState(0); // Add a key for forcing re-render of ReportList

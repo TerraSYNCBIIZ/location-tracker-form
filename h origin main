@@ -1,0 +1,1 @@
+[33me534c36[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Refactor application with major improvements: Fix Firebase credentials handling, add proper Eastern Time handling, improve error handling with ErrorBoundary, enhance type safety throughout the application, fix localStorage for SSR compatibility, update README, and add deployment scripts

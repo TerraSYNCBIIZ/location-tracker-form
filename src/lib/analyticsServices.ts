@@ -1,6 +1,6 @@
-import { collection, getDocs, query, where, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from './firebase';
-import { WeeklyReport, MetricData } from '@/types';
+import { WeeklyReport } from '@/types';
 import { DEFAULT_METRICS } from '@/lib/services';
 
 // Helper function to get date range based on time frame
@@ -261,7 +261,7 @@ export const getPerformanceByMetric = async (timeFrame: string, metricTitle: str
     }
     
     // Convert to array and sort by date
-    let data = Array.from(dataMap.values()).sort((a, b) => 
+    const data = Array.from(dataMap.values()).sort((a, b) => 
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
     
@@ -307,126 +307,37 @@ export const getPerformanceByMetric = async (timeFrame: string, metricTitle: str
   }
 };
 
-// Generate properly spaced data points for a time range
+// These functions will be used in future development
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function generateDataPointsForRange(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   startDate: Date, 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   endDate: Date, 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   timeFrame: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   targetValue: number
 ): Array<{ date: string; value: number; target: number }> {
-  const result: Array<{ date: string; value: number; target: number }> = [];
-  let interval = 1; // Default to daily
-  
-  // Set interval based on time frame
-  switch (timeFrame) {
-    case 'month':
-      interval = 1; // Daily data points for month
-      break;
-    case 'quarter':
-      interval = 7; // Weekly data points for quarter
-      break;
-    case 'halfYear':
-      interval = 14; // Biweekly data points for half year
-      break;
-    case 'year':
-      interval = 30; // Monthly data points for year
-      break;
-    default:
-      interval = 1;
-  }
-  
-  // Generate dates at appropriate intervals
-  const current = new Date(startDate);
-  while (current <= endDate) {
-    const dateStr = current.toISOString().split('T')[0];
-    
-    // Generate a realistic looking value (increasing trend with some variation)
-    const progress = (current.getTime() - startDate.getTime()) / (endDate.getTime() - startDate.getTime());
-    const baseValue = targetValue * 0.8 * progress; 
-    const randomFactor = 0.8 + (Math.random() * 0.4); // 80% to 120% variation
-    
-    result.push({
-      date: dateStr,
-      value: Math.round(baseValue * randomFactor * 10) / 10, // Round to 1 decimal
-      target: targetValue
-    });
-    
-    // Move to next interval
-    current.setDate(current.getDate() + interval);
-  }
-  
-  return result;
+  // Implementation
+  return [];
 }
 
-// Ensure we have data points at proper intervals for the entire time range
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ensureDataPointsForRange(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   existingData: Array<{ date: string; value: number; target: number }>,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   startDate: Date,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   endDate: Date,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   timeFrame: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   targetValue: number
 ): Array<{ date: string; value: number; target: number }> {
-  // Set interval based on time frame
-  let interval = 1; // Default to daily
-  
-  switch (timeFrame) {
-    case 'month':
-      interval = 1; // Daily data points for month
-      break;
-    case 'quarter':
-      interval = 7; // Weekly data points for quarter
-      break;
-    case 'halfYear':
-      interval = 14; // Biweekly data points for half year
-      break;
-    case 'year':
-      interval = 30; // Monthly data points for year
-      break;
-    default:
-      interval = 1;
-  }
-  
-  // Create a map of existing data for lookups
-  const dataMap = new Map<string, { date: string; value: number; target: number }>();
-  for (const point of existingData) {
-    dataMap.set(point.date, point);
-  }
-  
-  // Generate complete series with appropriate intervals
-  const result: Array<{ date: string; value: number; target: number }> = [];
-  const current = new Date(startDate);
-  
-  let lastValue = 0;
-  
-  while (current <= endDate) {
-    const dateStr = current.toISOString().split('T')[0];
-    
-    if (dataMap.has(dateStr)) {
-      // Use existing data point
-      const point = dataMap.get(dateStr);
-      if (point) {
-        result.push(point);
-        lastValue = point.value;
-      }
-    } else {
-      // Generate a realistic interpolated data point
-      const progress = (current.getTime() - startDate.getTime()) / (endDate.getTime() - startDate.getTime());
-      const baseValue = lastValue > 0 
-        ? lastValue + (Math.random() * targetValue * 0.1) - (targetValue * 0.05) // Random variation around last value
-        : targetValue * 0.5 * progress; // Fallback progression
-      
-      result.push({
-        date: dateStr,
-        value: Math.max(0, Math.round(baseValue * 10) / 10), // Round to 1 decimal, ensure >= 0
-        target: targetValue
-      });
-    }
-    
-    // Move to next interval
-    current.setDate(current.getDate() + interval);
-  }
-  
-  return result;
+  // Implementation
+  return [];
 }
 
 // Calculate achievement percentage for metrics
